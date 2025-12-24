@@ -2,13 +2,15 @@
 
 ## about this project
 
-i started this project because i kept seeing people online talking about how fashion has been “getting more neutral” over the past decade, fewer bold colors, more beige, gray, black, and muted tones, and how that might connect to things like minimalism, sustainability, social media aesthetics, economic uncertainty, or even how we consume trends now...
+i started this project in november of 2025 because i kept seeing people online talking about how fashion has been “getting more neutral” over the past decade, fewer bold colors, more beige, gray, black, and muted tones, and how that might connect to things like minimalism, sustainability, social media aesthetics, economic uncertainty, or even how we consume trends now...
 
 i wanted to see if that idea actually shows up in the data, so this project looks at runway images over time to answer:
 
 **are runway collections becoming more neutral in color over time?**
 
 to explore that, i use computer vision and unsupervised learning to extract dominant color palettes from runway looks and measure how “neutral” each look is based on color chroma. then i aggregate those measurements by year and visualize how they change over time.
+
+i used the internet archive "vogue runway" dataset.
 
 right now this repo contains the early foundation of that pipeline, very much a work in progress
 
