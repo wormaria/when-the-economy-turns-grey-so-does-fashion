@@ -30,7 +30,7 @@ results at this stage are preliminary and noisy, mostly because the sample size 
 
 ## results
 
-like said before, i sucessfully analyzed how image color properties have changed over time using two main metrics: mean chroma (overall color intensity) and neutral color share (how much of an image is composed of near-gray tones). together, these give a pretty good picture of how visually “loud” or “muted” digital imagery is in a given year.
+i sucessfully analyzed how image color properties have changed over time using two main metrics: mean chroma (overall color intensity) and neutral color share (how much of an image is composed of near-gray tones). together, these give a pretty good picture of how visually “loud” or “muted” digital imagery is in a given year.
 
 the main trend is surprisingly clean.
 
