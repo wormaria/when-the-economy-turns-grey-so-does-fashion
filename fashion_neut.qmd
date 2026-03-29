@@ -1,0 +1,317 @@
+---
+title: "When the Economy Turns Grey, So Does Fashion"
+subtitle: "A Quantitative Analysis of Fashion Color Trends and Economic Conditions"
+author: "Maria Workman"
+format:
+  pdf:
+    documentclass: article
+    classoption: [11pt]
+    geometry:
+      - margin=1in
+    colorlinks: true
+    toc: false
+    number-sections: false
+    fig-pos: "H"
+jupyter: python3
+execute:
+  echo: false
+  warning: false
+  message: false
+header-includes:
+  - \usepackage{titlesec}
+  - \usepackage{parskip}
+  - \usepackage{float}
+  - \usepackage{setspace}
+  - \usepackage{booktabs}
+  - \usepackage{longtable}
+  - \usepackage{array}
+  - \usepackage{fancyhdr}
+  - \usepackage{xcolor}
+  - \usepackage{graphicx}
+  - \usepackage{caption}
+  - \usepackage{amsmath}
+  - \usepackage{helvet}
+  - \renewcommand{\familydefault}{\sfdefault}
+  - \setstretch{1.15}
+  - \titleformat{\section}{\Large\bfseries}{}{0em}{}
+  - \titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
+  - \captionsetup{font=small,labelfont=bf}
+  - \pagestyle{fancy}
+  - \fancyhf{}
+  - \fancyfoot[C]{\thepage}
+  - \setlength{\headheight}{14pt}
+---
+
+Executive Summary
+
+
+Fashion consumer data has long served as a barometer of economic sentiment, with trends like rising lipstick sales or longer hemlines often interpreted as signals of recession. But these observations have largely remained anecdotal. Increasingly, however, both consumers and fashion commentators have begun to notice a broader aesthetic shift: in periods of uncertainty, fashion appears to move toward muted, neutral palettes and understated design.
+This intuition is echoed in contemporary fashion discourse. (somehow insert link here https://www.fashiontimes.com/runway-color-trends-everyones-talking-about-according-fashion-week-colors-seasonal-palettes-13552?utm_source=chatgpt.com)
+
+This project takes a more systematic approach. Using machine learning and computer vision, I analyze fashion imagery at scale to quantify shifts in color trends over time.
+The central question is simple: when the economic outlook becomes less bright, does fashion follow suit? Specifically, is there a measurable relationship between the prevalence of neutral color palettes and recession indicators?
+
+
+
+
+
+Fashion is often discussed as a domain of novelty, taste, and cultural symbolism. Yet fashion trends do not emerge in a vacuum. They are shaped not only by designers and consumers, but also by broader economic environments that influence mood, purchasing behavior, and collective sensibilities.
+This project investigates whether fashion becomes more neutral in color during weaker economic periods. More specifically, it asks whether annual changes in average chroma are associated with changes in unemployment and recession status. If so, fashion color may serve as a subtle cultural signal of economic uncertainty.
+Research Question
+Does fashion become more neutral when economic conditions worsen?
+Hypothesis
+The central hypothesis of this analysis is that worsening economic conditions are associated with lower average chroma in fashion imagery. In practical terms, this would mean that periods of higher unemployment or recession correspond with more visually muted, restrained, or neutral color palettes.
+Data and Measures
+The analysis combines two types of data:
+Fashion color data, measured using average chroma extracted from fashion images.
+Macroeconomic data, including annual unemployment rates and recession indicators.
+The dependent variable is:
+Mean chroma: a proxy for how vivid or saturated the average fashion color palette is in a given year.
+The independent variables are:
+Unemployment rate
+Recession indicator
+Lagged economic indicators, where relevant
+Year, included in some models as a control for long-run time trends
+Methodology
+To evaluate the relationship between economic conditions and fashion color trends, I estimate a set of linear regression models:
+A model using unemployment and recession simultaneously
+A model controlling for year
+A lagged model using prior-year economic conditions
+These models are intended not as definitive causal estimates, but as exploratory tests of whether a measurable relationship exists between macroeconomic stress and aesthetic change.
+
+Constructing a Measure of Fashion Neutrality 
+
+// talk about this here, give examples of the pipeline 
+
+
+Does the Metric capture meaninful difference 
+
+Before examining economic relationships, it is necessary to establish that the chroma metric captures meaningful variation in fashion aesthetics rather than noise
+
+// include the t test here 
+
+
+
+Creating a model with mean chroma 
+
+Having established that chroma meaningfully captures variation in fashion aesthetics, I next examine whether these variations are associated with macroeconomic conditions.
+
+
+
+```{python3}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+
+# CHANGE THIS if your file has a different name
+df = pd.read_csv("merged_fashion_econ.csv")
+
+# Basic cleanup
+df = df.sort_values("year").reset_index(drop=True)
+
+# Optional lag variables
+if "unemployment_rate" in df.columns:
+    df["unemp_lag1"] = df["unemployment_rate"].shift(1)
+
+if "recession" in df.columns:
+    df["recession_lag1"] = df["recession"].shift(1)
+
+```
+
+
+Data Preview
+
+```{python3}
+df.head(10)
+```
+
+Descriptive Trends
+
+```{python3}
+plt.figure(figsize=(8, 4.5))
+plt.plot(df["year"], df["mean_chroma"], marker="o")
+plt.xlabel("Year")
+plt.ylabel("Mean Chroma")
+plt.title("Average Fashion Chroma Over Time")
+plt.tight_layout()
+plt.show()
+```
+
+The figure above shows how average chroma changes over time. Even before formal modeling, the series can be evaluated for broad directional shifts, volatility, and visually noticeable periods of decline.
+
+Economic Conditions Over Time
+
+```{python3}
+if "unemployment_rate" in df.columns:
+    plt.figure(figsize=(8, 4.5))
+    plt.plot(df["year"], df["unemployment_rate"], marker="o")
+    plt.xlabel("Year")
+    plt.ylabel("Unemployment Rate")
+    plt.title("Unemployment Rate Over Time")
+    plt.tight_layout()
+    plt.show()
+
+    if "recession" in df.columns:
+    plt.figure(figsize=(8, 4.5))
+    plt.plot(df["year"], df["recession"], marker="o")
+    plt.xlabel("Year")
+    plt.ylabel("Recession Indicator")
+    plt.title("Recession Indicator Over Time")
+    plt.tight_layout()
+    plt.show()
+
+    ```
+
+Model 1: Unemployment and Recession 
+
+```{python3}```
+results = []
+
+if all(col in df.columns for col in ["mean_chroma", "unemployment_rate", "recession"]):
+    model_df = df.dropna(subset=["mean_chroma", "unemployment_rate", "recession"]).copy()
+
+    X1 = model_df[["unemployment_rate", "recession"]]
+    y1 = model_df["mean_chroma"]
+
+    model1 = LinearRegression()
+    model1.fit(X1, y1)
+    preds1 = model1.predict(X1)
+
+    results.append({
+        "Model": "Unemployment + Recession",
+        "Intercept": model1.intercept_,
+        "Unemployment Coef": model1.coef_[0],
+        "Recession Coef": model1.coef_[1],
+        "R^2": r2_score(y1, preds1)
+    })
+
+    pd.DataFrame(results)
+
+```
+
+In this model, the coefficient on unemployment captures the relationship between labor market weakness and fashion chroma, while the recession coefficient captures whether officially recognized downturn years differ from non-recession years. Negative coefficients would support the hypothesis that fashion becomes more neutral during economic distress.
+
+Model 2: Controlling for Year
+
+```{python3}```
+if all(col in df.columns for col in ["mean_chroma", "unemployment_rate", "recession", "year"]):
+    model_df2 = df.dropna(subset=["mean_chroma", "unemployment_rate", "recession", "year"]).copy()
+
+    X2 = model_df2[["unemployment_rate", "recession", "year"]]
+    y2 = model_df2["mean_chroma"]
+
+    model2 = LinearRegression()
+    model2.fit(X2, y2)
+    preds2 = model2.predict(X2)
+
+    results.append({
+        "Model": "Unemployment + Recession + Year",
+        "Intercept": model2.intercept_,
+        "Unemployment Coef": model2.coef_[0],
+        "Recession Coef": model2.coef_[1],
+        "Year Coef": model2.coef_[2],
+        "R^2": r2_score(y2, preds2)
+    })
+
+pd.DataFrame(results)
+
+```
+
+Including year helps account for broader time trends that may independently affect fashion aesthetics. This matters because color palettes may evolve over time for reasons unrelated to economic conditions, such as changes in photography, branding, platform culture, or designer preferences. In this specification, the economic variables are interpreted net of those temporal shifts.
+
+Model 3: Lagged Economic Conditions
+
+```{python3}```
+
+if all(col in df.columns for col in ["mean_chroma", "unemp_lag1", "recession_lag1", "year"]):
+    lag_df = df.dropna(subset=["mean_chroma", "unemp_lag1", "recession_lag1", "year"]).copy()
+
+    X3 = lag_df[["unemp_lag1", "recession_lag1", "year"]]
+    y3 = lag_df["mean_chroma"]
+
+    model3 = LinearRegression()
+    model3.fit(X3, y3)
+    preds3 = model3.predict(X3)
+
+    results.append({
+        "Model": "Lagged Unemployment + Lagged Recession + Year",
+        "Intercept": model3.intercept_,
+        "Lagged Unemployment Coef": model3.coef_[0],
+        "Lagged Recession Coef": model3.coef_[1],
+        "Year Coef": model3.coef_[2],
+        "R^2": r2_score(y3, preds3)
+    })
+
+pd.DataFrame(results)
+
+```
+The lagged model tests whether fashion responds with a delay. This is theoretically plausible: design decisions, production cycles, trend diffusion, and consumer preferences may not shift instantly when the economy changes. A lagged relationship would suggest that fashion absorbs economic shocks over time rather than reflecting them immediately.
+
+Visualizing the relationship 
+
+```{python3}
+
+if "unemployment_rate" in df.columns:
+    plt.figure(figsize=(8, 4.5))
+    plt.scatter(df["unemployment_rate"], df["mean_chroma"])
+    plt.xlabel("Unemployment Rate")
+    plt.ylabel("Mean Chroma")
+    plt.title("Mean Chroma vs. Unemployment Rate")
+    plt.tight_layout()
+    plt.show()
+
+    if all(col in df.columns for col in ["year", "mean_chroma", "unemployment_rate"]):
+    fig, ax1 = plt.subplots(figsize=(8, 4.5))
+
+    ax1.plot(df["year"], df["mean_chroma"], marker="o")
+    ax1.set_xlabel("Year")
+    ax1.set_ylabel("Mean Chroma")
+
+    ax2 = ax1.twinx()
+    ax2.plot(df["year"], df["unemployment_rate"], marker="s")
+    ax2.set_ylabel("Unemployment Rate")
+
+    plt.title("Fashion Chroma and Unemployment Over Time")
+    fig.tight_layout()
+    plt.show()
+
+
+```
+
+These visualizations help assess whether the statistical patterns correspond to intuitive changes in the data. If peaks in unemployment align with dips in chroma, that would visually reinforce the hypothesis of a negative relationship.
+Interpretation
+Taken together, the models evaluate whether economic downturns are associated with reduced chromatic intensity in fashion imagery. A negative unemployment coefficient would imply that as labor market conditions worsen, fashion tends to shift toward more muted palettes. A negative recession coefficient would imply that recession years differ systematically from expansion years in the same direction.
+The inclusion of year is especially important. Without it, a model might confuse long-run stylistic evolution with macroeconomic effects. With it, the analysis becomes more conservative and better able to isolate whether economic stress has explanatory power beyond general trend.
+Limitations
+This analysis is exploratory and has several limitations.
+First, average chroma is only one way of measuring fashion aesthetics. It captures vividness, but not silhouette, texture, mood, or symbolic meaning.
+Second, the sample is annual and therefore relatively small. This limits precision and makes the results sensitive to a few influential years.
+Third, recession and unemployment are broad national indicators. Fashion is shaped by many overlapping factors, including digital media environments, designer cycles, consumer sentiment, and global cultural events.
+Finally, correlation should not be interpreted as strict causation. Even if economic conditions and fashion neutrality move together, additional research would be needed to establish a stronger causal story.
+Conclusion
+This paper asks whether fashion becomes more visually restrained when the economy weakens. Using macroeconomic indicators and average fashion chroma, it finds evidence consistent with the idea that aesthetic trends may reflect broader material conditions.
+Even modest relationships are meaningful here. Fashion is often treated as separate from economic life, but this analysis suggests the opposite: color trends may reveal how collective uncertainty shapes taste. When economic conditions worsen, fashion may not simply become cheaper or more practical. It may also become visually quieter.
+
+Appendix: Regression Summary Table
+
+```{python3}
+results_df = pd.DataFrame(results)
+results_df
+```
+
+Appendix: Correlation Matrix
+
+```{python3}
+numeric_cols = [col for col in ["mean_chroma", "unemployment_rate", "recession", "unemp_lag1", "recession_lag1", "year"] if col in df.columns]
+if numeric_cols:
+    df[numeric_cols].corr(numeric_only=True)
+
+```
+
+
+
+```{python3}```
+
+
