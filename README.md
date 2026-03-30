@@ -133,10 +133,3 @@ This project reframes fashion as **quantifiable data**, showing that:
 
 **Maria Workman**  
 UNC Chapel Hill — Statistics & Computer Science  
-
----
-
-## TL;DR
-
-> Fashion doesn’t just reflect the economy —  
-> it can be **measured as part of it**.
