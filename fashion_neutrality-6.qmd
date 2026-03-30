@@ -102,11 +102,12 @@ Fashion consumer data has long served as a barometer of economic sentiment.
 The so-called *lipstick effect*—consumers trading down to small, affordable
 luxuries in downturns—is well documented in industry and financial circles
 [@chase_lipstick].
-Yet a subtler pattern has gone largely unmeasured: the apparent drift of
-runway aesthetics toward muted, neutral palettes during periods of economic
-uncertainty [@fashiontimes_color].
+Yet a subtler pattern has been identified by consumers: the apparent drift of
+runway aesthetics toward muted, neutral palettes coinciding with periods of 
+economic uncertainty [@fashiontimes_color].
 
-This project takes a systematic approach. Using computer vision and
+This project takes a more systematic approach to see if this trend identified 
+online can be identified in high fashion imagery. Using computer vision and
 unsupervised machine learning, I analyze **2,400 runway images** from the
 *Vogue Runway* archive (2000–2023) to quantify shifts in color saturation
 over time and test whether those shifts correlate with macroeconomic
@@ -114,6 +115,8 @@ conditions.
 
 **Central question:** when the economic outlook becomes less bright, does
 fashion follow suit?
+
+** For claude: I want to put an image to the right of this paragraph
 
 ---
 
@@ -182,6 +185,8 @@ than simply averaging intensity.
 :::
 
 Results are aggregated by year.
+
+## For claude: I want to put an example of a low chroma and higher chroma look here 
 
 ---
 
@@ -424,6 +429,8 @@ plt.show()
 
 ### Model 1: Unemployment + Recession
 
+## For claude: please plot this!!! 
+
 ```{python}
 #| label: reg-model1
 #| include: false
@@ -457,6 +464,8 @@ print(f"R² = {r2_m1:.3f}")
 ```
 
 ### Model 2: Adding Year as a Trend Control
+
+## For claude: please plot this.
 
 ```{python}
 #| label: reg-model2
@@ -512,6 +521,8 @@ plt.show()
 
 ### Model 3: Lagged Recession
 
+## For claude:  Please plot this ! 
+
 To test whether fashion responds to economic conditions with a delay,
 I construct a lagged model using the *prior year's* recession share alongside
 current unemployment and a year trend.
@@ -553,6 +564,8 @@ display(
 )
 print(f"R² = {r2_m3:.3f}")
 ```
+
+# For claude: take out the actual versus predicted mdoels and i want to see the MLR plotted as a line. the model is messy so the actual versus predicted time series will look bad
 
 ```{python}
 #| label: fig-lag-pred
@@ -601,12 +614,56 @@ display(
 
 ## Discussion & Conclusions
 
-::: {.callout-note appearance="simple" icon=false}
-🚧 **Coming soon.** This section will interpret the regression findings,
-address limitations (e.g., selection bias in runway sampling, chroma as a
-proxy for neutrality), and situate the results within broader conversations
-about fashion as economic signal.
-:::
+The results suggest a tentative relationship between macroeconomic conditions and visual language of high fashion trends. 
+Periods associated with economic pessimism proxied by higher unemployment and recession idicators
+tend to coincide with a measurable shift in high fashion runway 
+average pallettes oer look. 
+This finding lends empirical support to the sociological idea that 
+fashion trends reflect broader societal and therefore consumer mood.
+
+However, this relationship should be interpreted with caution. 
+First, fashion is influenced by a wide range of factors beyond the economy, 
+i. e., designer preferences, seasonal palletes, and cultural movements. 
+
+# For claude: insert space for an image here. 
+
+While the second and third regression model control for time, a simple linear regresson cannot fully disentangle and 
+control for these factors. 
+
+However, I would like to reference my finding of the positive time trend--
+which suggest that fashion may be becoming more netural over time,
+independent of economic conditions. This suggest perhaps a link torwards 
+other sentiments, perhaps sociological, artistic, or even political. 
+
+I must also emphasize that the use of runway imagery introduces a distinction between high fashion and consume rbehavior I do nt intend to say that all consumers dress and buy 
+on average more neutral during a recession. Moreover, the complex itneraction between 
+designers and consumers must be noted -- its possible designers 
+anticipate or interpret economic sentiment differently than consumers themselves, 
+and we might say that we pnly in fact our measuring the pool of designers outlook on the economy 
+and not the whole nation. 
+
+The construction of the chroma metric, while systematic and robust as I possibly could 
+manage, does simplify complex visua phenomenon. Color perception is multidimensional, and reducing it to a single measure of “neutrality” may obscure important nuances, such as contrast, texture, or styling context.
+Future work could extend this framework by incorporating additional visual features or by validating the metric against human perception.
+
+Despite these limitations, the findings demonstrate the potential of combining computer vision with economic analysis to study cultural phenomena at scale. By moving beyond anecdotal indicators like the “lipstick index,” this approach provides a more rigorous way to quantify how aesthetic trends evolve alongside economic conditions.
+
+## For claude; make sure that all of this sounds good 
+and the grammars fine please 
+
+## Conclusion ## 
+
+## for claude: shorten this conclusion to like two paragraphs. 
+chat gpt wrote the comclusion and its 
+too much yappppp
+
+
+This project set out to examine whether fashion responds to shifts in economic sentiment, asking a simple question: when the economic outlook darkens, does fashion follow suit?
+Using machine learning and computer vision techniques applied to large-scale fashion imagery, the analysis finds evidence of a relationship between recession indicators and increased prevalence of neutral color palettes. While not definitive, these results suggest that fashion may indeed act as a subtle, visual reflection of broader economic conditions.
+More broadly, this work highlights the value of treating fashion not just as an artistic domain, but as a dataset—one that encodes information about culture, sentiment, and collective behavior. As computational tools continue to advance, they open new possibilities for analyzing traditionally qualitative fields with quantitative rigor.
+Future research could expand this analysis by incorporating retail-level data, consumer purchasing behavior, or cross-cultural comparisons, further bridging the gap between economic indicators and aesthetic expression.
+In doing so, it may become possible to move from metaphor to measurement—transforming the idea that “fashion reflects the times” into something that can be observed, tested, and understood.
+
 
 ---
 
