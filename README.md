@@ -1,63 +1,161 @@
 # fashion neutrality trends on the runway
 
-## about this project
-
-i started this project in november of 2025 because i kept seeing people online talking about how fashion has been “getting more neutral” over the past decade, fewer bold colors, more beige, gray, black, and muted tones, and how that might connect to things like minimalism, sustainability, social media aesthetics, economic uncertainty, or even how we consume trends now...
-
-i wanted to see if that idea actually shows up in the data, so this project looks at runway images over time to answer:
-
-**are runway collections becoming more neutral in color over time?**
-
-to explore that, i use computer vision and unsupervised learning to extract dominant color palettes from runway looks and measure how “neutral” each look is based on color chroma. then i aggregate those measurements by year and visualize how they change over time.
-
-i used the internet archive "vogue runway" dataset.
-
-right now this repo contains the early foundation of that pipeline, very much a work in progress
+![status](https://img.shields.io/badge/status-in%20progress-blue)
+![python](https://img.shields.io/badge/python-3.10+-blue)
+![focus](https://img.shields.io/badge/focus-computer%20vision%20%7C%20data%20science-lightgrey)
 
 ---
 
-## current status 
+## tl;dr
 
-so far i have:
+- built a computer vision pipeline to **quantify fashion aesthetics** using color (chroma)  
+- validated that the metric captures **real differences in visual style**  
+- found clear time trends in runway color intensity (2013–2023)  
+- extended the analysis to test whether **fashion becomes more neutral during economic downturns**  
+- early results suggest a relationship between **economic stress and muted color palettes**
 
-- set up the project environment and repo structure  
-- loaded runway metadata and sampled looks evenly by year  
-- built a baseline image preprocessing pipeline  
-- implemented k-means color palette extraction  
-- computed initial neutrality metrics per image  
+---
 
-results at this stage are preliminary and noisy, mostly because the sample size is still small and the masking is intentionally simple. the goal for now is to get the pipeline working end-to-end before making it more robust.
+## about this project
+
+i started this project in november 2025 after noticing a recurring idea online: that fashion has been “getting more neutral” over time — fewer bold colors, more beige, gray, black, and muted tones.
+
+people often link this shift to things like minimalism, sustainability, social media aesthetics, or even economic uncertainty.
+
+i wanted to test whether that idea actually shows up in the data.
+
+but instead of just visually inspecting trends, this project asks a deeper question:
+
+> **can we *quantitatively measure* how “neutral” fashion is — and does that measure change in meaningful ways over time?**
+
+to answer that, i built a computer vision pipeline that extracts color information from runway images and constructs a metric of **fashion neutrality** based on chroma (color intensity).
+
+---
+
+## core idea
+
+this project has two main components:
+
+### 1. measuring fashion aesthetics
+
+i use computer vision and unsupervised learning to extract dominant color palettes from runway looks and compute:
+
+- **mean chroma** → how vivid or saturated colors are  
+- **neutral color share** → how much of an image is near-gray  
+
+together, these serve as a proxy for how visually “loud” or “muted” fashion is in a given year.
+
+### 2. validating the metric
+
+before using these measures in downstream analysis, i test whether they actually capture meaningful aesthetic differences.
+
+i compare periods that are visually distinct (e.g., high-contrast vs low-contrast eras) and show that the chroma-based metric detects statistically significant differences between them.
+
+this step ensures the metric reflects real variation in fashion, not noise.
+
+---
+
+## data
+
+- runway images from the **internet archive "vogue runway" dataset**
+- images sampled across years for temporal balance
+- processed into per-image metrics and aggregated yearly
+
+---
+
+## methodology
+
+the pipeline:
+
+1. **image preprocessing**
+   - cropping + background reduction
+
+2. **color extraction**
+   - k-means clustering (dominant colors)
+
+3. **feature construction**
+   - perceptual color space conversion
+   - mean chroma
+   - neutral share
+
+4. **aggregation**
+   - yearly averages
+
+---
 
 ## results
 
-i sucessfully analyzed how image color properties have changed over time using two main metrics: mean chroma (overall color intensity) and neutral color share (how much of an image is composed of near-gray tones). together, these give a pretty good picture of how visually “loud” or “muted” digital imagery is in a given year.
+the time series shows clear structure:
 
-the main trend is surprisingly clean.
+- **2013–2015:** more muted  
+- **2016–2020:** strong shift toward vibrant, high-contrast styles  
+- **2023:** noticeable drop in chroma → possible return to neutrality  
 
-from about **2013 to 2015**, mean chroma drops while neutral share rises — images become more muted and minimalist. starting around **2016**, that trend reverses hard. mean chroma climbs steadily and peaks around **2019–2020**, while neutral share falls at the same time. this suggests a broad shift toward much more colorful, high-contrast visual styles in the late 2010s...
+mean chroma and neutral share move in opposite directions, reinforcing that both metrics capture the same underlying aesthetic shift.
 
-after 2020, things get messy. chroma stays high through 2021–2022 but becomes more unstable, and in **2023 there’s a sharp drop in mean chroma** paired with a rebound in neutral share. this lines up with what a lot of people anecdotally feel — that visual culture might be pulling back from the hyper-saturated look of the late 2010s.
+---
 
-i’d really like to extend this analysis through **2024 and 2025** once more data is available to see if this downward shift continues. unfortuantely, the dataset i used does not have much at all for 2024, so i might rerun with a different data set in the next iteration. if it does, it would suggest we’re entering a new aesthetic phase.... 
+## extending the analysis: economics
 
-i also note that mean chroma and neutral share move almost perfectly in opposite directions across time, which is exactly what you’d expect if the metrics are actually capturing real visual change rather than noise
+after validating the chroma metric, i test:
+
+> **does fashion become more neutral during economic stress?**
+
+i combine fashion data with:
+
+- unemployment rates  
+- recession indicators  
+
+and run regression + lag models.
+
+this turns the project into an exploration of how **macroeconomic conditions may influence aesthetic trends**.
+
+---
+
+## project structure
+
+# ***** TO DO *****
+
+
+
+---
+
+## current status
+
+- pipeline built end-to-end  
+- chroma metric constructed + validated  
+- time series trends established  
+- economic data integrated  
+- regression + lag models implemented  
+
+still exploratory, but structurally complete.
+
+---
 
 ## next steps
 
-future work will: 
+- extend dataset to **2024–2025**  
+- improve garment segmentation  
+- refine chroma metric  
+- strengthen statistical validation  
+- explore additional economic/cultural variables  
+- build interactive visualizations  
 
-- quantify the relationship between mean chroma and neutral share (correlation + regression)
-- formally test whether the 2015 → 2020 increase in chroma is statistically significant
-- align the visual trends with external events, including major cultural or political shifts, to explore whether large-scale social context might influence aesthetic direction
-- expand the dataset into **2024–2025** to test whether the recent decline is the start of a new long-term trend 
+---
 
+## why this matters
+
+fashion is usually analyzed qualitatively.
+
+this project shows that it’s possible to:
+
+> **quantify aesthetic change and study it like a time series**
+
+it reframes fashion as not just style — but as a measurable reflection of broader social and economic conditions.
 
 ---
 
 ## setup
 
-install dependencies with:
-
 ```bash
 pip install -r requirements.txt
-

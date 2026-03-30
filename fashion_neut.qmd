@@ -45,8 +45,15 @@ header-includes:
 Executive Summary
 
 
-Fashion consumer data has long served as a barometer of economic sentiment, with trends like rising lipstick sales or longer hemlines often interpreted as signals of recession. But these observations have largely remained anecdotal. Increasingly, however, both consumers and fashion commentators have begun to notice a broader aesthetic shift: in periods of uncertainty, fashion appears to move toward muted, neutral palettes and understated design.
-This intuition is echoed in contemporary fashion discourse. (somehow insert link here https://www.fashiontimes.com/runway-color-trends-everyones-talking-about-according-fashion-week-colors-seasonal-palettes-13552?utm_source=chatgpt.com)
+Fashion consumer data has long served as a barometer of economic sentiment, with trends like 
+rising lipstick sales or longer hemlines often interpreted as signals of recession. But these observations 
+have largely remained anecdotal. Increasingly, however, both consumers and fashion commentators have begun to 
+notice a broader aesthetic shift: in periods of uncertainty, fashion appears to move toward muted, neutral palettes and understated design.
+This intuition is echoed in contemporary fashion discourse. 
+(somehow insert link here 
+https://www.fashiontimes.com/runway-color-trends-everyones-talking-about-according-fashion-week-colors-seasonal-palettes-13552?utm_source=chatgpt.com)
+( or this link 
+https://www.chase.com/personal/investments/learning-and-insights/article/what-is-the-lipstick-index ) 
 
 This project takes a more systematic approach. Using machine learning and computer vision, I analyze fashion imagery at scale to quantify shifts in color trends over time.
 The central question is simple: when the economic outlook becomes less bright, does fashion follow suit? Specifically, is there a measurable relationship between the prevalence of neutral color palettes and recession indicators?
@@ -94,7 +101,51 @@ Before examining economic relationships, it is necessary to establish that the c
 
 Creating a model with mean chroma 
 
-Having established that chroma meaningfully captures variation in fashion aesthetics, I next examine whether these variations are associated with macroeconomic conditions.
+Having established that chroma meaningfully captures variation in fashion aesthetics, 
+I next examine whether these variations are associated with macroeconomic conditions.
+
+
+
+Before extracting color information, I applied background removal to better isolate the 
+clothing itself from distracting elements such as runway backdrops, lighting, and audience noise. 
+I used Python’s rembg library, which leverages deep learning–based segmentation to automatically remove image 
+backgrounds and retain the foreground subject. This step was important because background colors can significantly skew palette extraction, 
+especially in runway photography where staging and lighting vary widely.
+
+Each image was processed to extract its dominant color palette using k-means clustering, an unsupervised machine learning technique 
+that groups similar pixels based on color similarity. I set 
+k=8, meaning that each image is represented by eight dominant color clusters, which together approximate its overall palette.
+From these extracted palettes, I construct two complementary metrics to quantify how visually “neutral” a given look is.
+The first is mean chroma, which captures the average color intensity across the palette. Lower chroma values correspond to more muted, 
+desaturated tones—such as greys, blacks, and earth tones—while higher values indicate more vivid, saturated colors.
+The second is neutral share, defined as the proportion of palette colors that fall below a specified chroma threshold.
+ This metric captures the extent to which a look is dominated by neutral tones, rather than simply averaging intensity. 
+ While mean chroma reflects overall vibrancy, neutral share isolates the prevalence of subdued colors within the composition.
+Full implementation details, including image preprocessing and clustering procedures, are available in the accompanying repository.
+
+```{python3}
+
+# load results from the k means clustering 
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+metrics_df = pd.read_csv("/Users/mariaworkman/fashion/fashion-neutrality/data/results/metrics_full_run.csv")
+
+# keep only valid rows
+metrics_df = metrics_df[metrics_df["ok"] == True]
+```
+
+
+
+
+
+Creating a model with mean chroma 
+
+Having established that chroma meaningfully captures variation in fashion aesthetics, 
+I next examine whether these variations are associated with macroeconomic conditions.
+
+
 
 
 
