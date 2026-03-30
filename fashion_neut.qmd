@@ -42,86 +42,126 @@ header-includes:
   - \setlength{\headheight}{14pt}
 ---
 
-Executive Summary
+***Done***
+
+1. Executive Summmary 
+
+***To Do***
+
+2. Introduction 
+
+3. Constructing a Measure of "Neutrality"
+
+4. Validating the Metric 
+
+5. Data and Economic Variables 
+
+6. Empirical Strategy 
+
+7. Results 
+
+8. Lagged Effects 
+
+9. Discussion. 
+
+10. Conclusion 
 
 
-Fashion consumer data has long served as a barometer of economic sentiment, with trends like 
-rising lipstick sales or longer hemlines often interpreted as signals of recession. But these observations 
-have largely remained anecdotal. Increasingly, however, both consumers and fashion commentators have begun to 
-notice a broader aesthetic shift: in periods of uncertainty, fashion appears to move toward muted, neutral palettes and understated design.
-This intuition is echoed in contemporary fashion discourse. 
-(somehow insert link here 
-https://www.fashiontimes.com/runway-color-trends-everyones-talking-about-according-fashion-week-colors-seasonal-palettes-13552?utm_source=chatgpt.com)
-( or this link 
-https://www.chase.com/personal/investments/learning-and-insights/article/what-is-the-lipstick-index ) 
+
+1. Executive Summary
+
+Fashion consumer data has long served as a barometer of economic sentiment, with trends such as rising lipstick sales or longer hemlines often interpreted as signals of recession.
+
+These patterns—sometimes described as the “lipstick effect,” in which consumers shift toward smaller, more affordable luxuries during downturns—have been widely discussed in both industry and financial contexts.^[For a general overview of the lipstick effect, see: https://www.chase.com/personal/investments/learning-and-insights/article/what-is-the-lipstick-index]
+
+Yet such observations have largely remained anecdotal. Increasingly, however, both consumers and fashion commentators have begun to notice a broader aesthetic shift: in periods of uncertainty, fashion appears to move toward muted, neutral palettes and understated design.
+
+This intuition is echoed in contemporary fashion discourse, where seasonal palettes and runway trends are frequently described as becoming more subdued in tone during uncertain periods.^[See, for example: https://www.fashiontimes.com/runway-color-trends-everyones-talking-about-according-fashion-week-colors-seasonal-palettes-13552]
 
 This project takes a more systematic approach. Using machine learning and computer vision, I analyze fashion imagery at scale to quantify shifts in color trends over time.
+
 The central question is simple: when the economic outlook becomes less bright, does fashion follow suit? Specifically, is there a measurable relationship between the prevalence of neutral color palettes and recession indicators?
 
+2. Introduction 
 
+# Research Question
 
-
-
-Fashion is often discussed as a domain of novelty, taste, and cultural symbolism. Yet fashion trends do not emerge in a vacuum. They are shaped not only by designers and consumers, but also by broader economic environments that influence mood, purchasing behavior, and collective sensibilities.
-This project investigates whether fashion becomes more neutral in color during weaker economic periods. More specifically, it asks whether annual changes in average chroma are associated with changes in unemployment and recession status. If so, fashion color may serve as a subtle cultural signal of economic uncertainty.
-Research Question
 Does fashion become more neutral when economic conditions worsen?
-Hypothesis
-The central hypothesis of this analysis is that worsening economic conditions are associated with lower average chroma in fashion imagery. In practical terms, this would mean that periods of higher unemployment or recession correspond with more visually muted, restrained, or neutral color palettes.
-Data and Measures
+
+# Hypothesis
+
+The central hypothesis of this analysis is that worsening economic conditions are associated with lower average chroma in fashion imagery. In practical terms, this implies that periods of higher unemployment or recession correspond with more visually muted or neutral color palettes.
+
+# Data and Measures
+
 The analysis combines two types of data:
-Fashion color data, measured using average chroma extracted from fashion images.
-Macroeconomic data, including annual unemployment rates and recession indicators.
+
+- Fashion color data, measured using average chroma extracted from fashion images  
+- Macroeconomic data, including annual unemployment rates and recession indicators  
+
 The dependent variable is:
-Mean chroma: a proxy for how vivid or saturated the average fashion color palette is in a given year.
-The independent variables are:
-Unemployment rate
-Recession indicator
-Lagged economic indicators, where relevant
-Year, included in some models as a control for long-run time trends
-Methodology
+
+- **Mean chroma**: a proxy for how vivid or saturated the average fashion color palette is in a given year, constructed using unsupervised machine learning on up to 100 images per year sampled from the Internet Archive’s *Vogue Runway* dataset  
+
+Machine learning enables the processing and analysis of large-scale visual datasets that would be difficult to quantify manually.^[For an example of large-scale fashion image analysis using machine learning, see: https://arxiv.org/abs/1608.07444]
+
+The independent variables include:
+
+- Unemployment rate  
+- Lagged economic indicators, where relevant  
+- Year, included in some models as a control for long-run time trends  
+
+# Methodology
+
 To evaluate the relationship between economic conditions and fashion color trends, I estimate a set of linear regression models:
-A model using unemployment and recession simultaneously
-A model controlling for year
-A lagged model using prior-year economic conditions
-These models are intended not as definitive causal estimates, but as exploratory tests of whether a measurable relationship exists between macroeconomic stress and aesthetic change.
 
-Constructing a Measure of Fashion Neutrality 
+- A model using unemployment and recession simultaneously  
+- A model controlling for year  
+- A lagged model using prior-year economic conditions  
 
-// talk about this here, give examples of the pipeline 
+These models are not intended to establish definitive causal relationships, but rather to provide an exploratory framework for assessing whether a measurable association exists between macroeconomic stress and aesthetic change.
 
+3. Constructing a Measure of Neutrality 
 
-Does the Metric capture meaninful difference 
+# Constructing a Measure of Neutrality
 
-Before examining economic relationships, it is necessary to establish that the chroma metric captures meaningful variation in fashion aesthetics rather than noise
+Before extracting color information, I applied background removal to better isolate the clothing itself from distracting elements such as runway backdrops, lighting, and audience noise.
 
-// include the t test here 
+I used Python’s `rembg` library, which leverages deep learning–based segmentation to automatically remove image backgrounds and retain the foreground subject. This step is important because background colors can significantly skew palette extraction, especially in runway photography where staging and lighting vary widely.
 
+Each image was then processed to extract its dominant color palette using *k*-means clustering, an unsupervised machine learning technique that groups similar pixels based on color similarity. I set \( k = 8 \), meaning that each image is represented by eight dominant color clusters, which together approximate its overall palette.
 
-
-Creating a model with mean chroma 
-
-Having established that chroma meaningfully captures variation in fashion aesthetics, 
-I next examine whether these variations are associated with macroeconomic conditions.
-
-
-
-Before extracting color information, I applied background removal to better isolate the 
-clothing itself from distracting elements such as runway backdrops, lighting, and audience noise. 
-I used Python’s rembg library, which leverages deep learning–based segmentation to automatically remove image 
-backgrounds and retain the foreground subject. This step was important because background colors can significantly skew palette extraction, 
-especially in runway photography where staging and lighting vary widely.
-
-Each image was processed to extract its dominant color palette using k-means clustering, an unsupervised machine learning technique 
-that groups similar pixels based on color similarity. I set 
-k=8, meaning that each image is represented by eight dominant color clusters, which together approximate its overall palette.
 From these extracted palettes, I construct two complementary metrics to quantify how visually “neutral” a given look is.
-The first is mean chroma, which captures the average color intensity across the palette. Lower chroma values correspond to more muted, 
-desaturated tones—such as greys, blacks, and earth tones—while higher values indicate more vivid, saturated colors.
-The second is neutral share, defined as the proportion of palette colors that fall below a specified chroma threshold.
- This metric captures the extent to which a look is dominated by neutral tones, rather than simply averaging intensity. 
- While mean chroma reflects overall vibrancy, neutral share isolates the prevalence of subdued colors within the composition.
+
+- **Mean chroma**, which captures the average color intensity across the palette. Lower chroma values correspond to more muted, desaturated tones—such as greys, blacks, and earth tones—while higher values indicate more vivid, saturated colors.  
+
+- **Neutral share**, defined as the proportion of palette colors that fall below a specified chroma threshold. This metric captures the extent to which a look is dominated by neutral tones, rather than simply averaging intensity. While mean chroma reflects overall vibrancy, neutral share isolates the prevalence of subdued colors within the composition.  
+
 Full implementation details, including image preprocessing and clustering procedures, are available in the accompanying repository.
+
+I then aggregate the data by year. The results are shown below.
+
+```{python3}
+# aggregated plots here
+```
+
+Are these changes statistically significant, or simply noise? I performed a t-test to find out.
+
+```{python3}
+# t tests
+```
+
+Having established that chroma meaningfully captures variation in fashion aesthetics, I next examine whether these variations are associated with macroeconomic conditions.
+
+
+
+
+
+
+
+
+
+
 
 ```{python3}
 
