@@ -1,0 +1,222 @@
+/* ── Imports ─────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Root variables ──────────────────────────────────────────────────────── */
+:root {
+  --bone:    #f5f2ee;
+  --mist:    #ddd7ce;
+  --sand:    #c9b99a;
+  --accent:  #8c7b68;
+  --charcoal:#2b2b2b;
+  --mid:     #6b6457;
+}
+
+/* ── Body & base ─────────────────────────────────────────────────────────── */
+body {
+  background-color: var(--bone) !important;
+  color: var(--charcoal) !important;
+  font-family: 'Source Serif 4', Georgia, serif !important;
+  font-size: 17px !important;
+  line-height: 1.80 !important;
+  font-weight: 300;
+}
+
+/* ── Title block ─────────────────────────────────────────────────────────── */
+#title-block-header {
+  border-bottom: 1.5px solid var(--mist);
+  padding-bottom: 2rem;
+  margin-bottom: 2.8rem;
+}
+
+.title {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-size: 2.5rem !important;
+  font-weight: 600 !important;
+  color: var(--charcoal) !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font-family: 'Source Serif 4', serif !important;
+  font-size: 1.05rem !important;
+  color: var(--accent) !important;
+  font-weight: 300 !important;
+  font-style: italic;
+  margin-top: 0.5rem !important;
+}
+
+.author, .date {
+  font-size: 0.85rem !important;
+  color: var(--mid) !important;
+  font-family: 'Source Serif 4', serif !important;
+  letter-spacing: 0.04em;
+}
+
+/* ── Headings ────────────────────────────────────────────────────────────── */
+h2 {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-size: 1.65rem !important;
+  font-weight: 600 !important;
+  color: var(--charcoal) !important;
+  margin-top: 3rem !important;
+  margin-bottom: 0.6rem !important;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--mist);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-size: 1.15rem !important;
+  font-weight: 400 !important;
+  font-style: italic;
+  color: var(--accent) !important;
+  margin-top: 2rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* ── Paragraphs & prose ──────────────────────────────────────────────────── */
+p {
+  max-width: 68ch;
+}
+
+/* ── TOC ─────────────────────────────────────────────────────────────────── */
+#TOC {
+  font-family: 'Source Serif 4', serif !important;
+  font-size: 0.82rem !important;
+  border-left: 2px solid var(--mist) !important;
+  padding-left: 1rem !important;
+  background: transparent !important;
+}
+
+#TOC a {
+  color: var(--mid) !important;
+  text-decoration: none !important;
+}
+
+#TOC a:hover {
+  color: var(--accent) !important;
+}
+
+.sidebar-title-text {
+  font-family: 'Source Serif 4', serif !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: var(--accent) !important;
+}
+
+/* ── Horizontal rule ─────────────────────────────────────────────────────── */
+hr {
+  border: none !important;
+  border-top: 1px solid var(--mist) !important;
+  margin: 2.5rem 0 !important;
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+table {
+  font-family: 'Source Serif 4', serif !important;
+  font-size: 0.9rem !important;
+  border-collapse: collapse !important;
+  width: 100% !important;
+  max-width: 600px;
+  margin: 1.5rem 0 !important;
+}
+
+thead tr {
+  border-bottom: 1.5px solid var(--sand) !important;
+}
+
+th {
+  text-align: left !important;
+  font-weight: 600 !important;
+  font-family: 'Source Serif 4', serif !important;
+  padding: 0.5rem 1rem 0.5rem 0 !important;
+  color: var(--charcoal) !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+td {
+  padding: 0.45rem 1rem 0.45rem 0 !important;
+  border-bottom: 1px solid var(--mist) !important;
+  color: var(--charcoal) !important;
+}
+
+/* ── Callout boxes ───────────────────────────────────────────────────────── */
+.callout {
+  border-radius: 2px !important;
+  border-left: 3px solid var(--sand) !important;
+  background: rgba(201, 185, 154, 0.10) !important;
+  padding: 1rem 1.2rem !important;
+  font-size: 0.95rem !important;
+  margin: 1.5rem 0 !important;
+}
+
+.callout-note {
+  border-left-color: var(--accent) !important;
+}
+
+/* ── Blockquote (hypothesis) ─────────────────────────────────────────────── */
+blockquote {
+  border-left: 3px solid var(--sand) !important;
+  margin: 1.5rem 0 !important;
+  padding: 0.6rem 1.2rem !important;
+  font-style: italic !important;
+  color: var(--mid) !important;
+  font-size: 1.05rem !important;
+  background: transparent !important;
+}
+
+/* ── Figures & captions ──────────────────────────────────────────────────── */
+.quarto-figure {
+  margin: 2rem 0 !important;
+}
+
+figcaption, .figure-caption {
+  font-family: 'Source Serif 4', serif !important;
+  font-size: 0.82rem !important;
+  color: var(--mid) !important;
+  font-style: italic;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* ── Code (output only — no code blocks shown) ───────────────────────────── */
+pre.sourceCode {
+  display: none !important;
+}
+
+pre:not(.sourceCode) {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 0.82rem !important;
+  background: rgba(201, 185, 154, 0.15) !important;
+  border: 1px solid var(--mist) !important;
+  border-radius: 2px !important;
+  padding: 1rem !important;
+  color: var(--charcoal) !important;
+}
+
+code:not(pre code) {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 0.82rem !important;
+  background: rgba(201, 185, 154, 0.2) !important;
+  padding: 0.15em 0.35em !important;
+  border-radius: 2px !important;
+  color: var(--accent) !important;
+}
+
+/* ── Footer note ─────────────────────────────────────────────────────────── */
+p:last-child em {
+  font-size: 0.82rem;
+  color: var(--mid);
+}
+
+/* ── Responsive tweaks ───────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .title { font-size: 1.8rem !important; }
+  h2     { font-size: 1.35rem !important; }
+  body   { font-size: 16px !important; }
+}

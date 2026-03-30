@@ -1,0 +1,641 @@
+---
+title: "When the Economy Dims, Does Fashion Follow?"
+subtitle: "A Machine Learning Analysis of Color Trends and Macroeconomic Conditions"
+author: "Maria Workman"
+date: today
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 2
+    toc-title: "Contents"
+    toc-location: left
+    number-sections: false
+    code-fold: true
+    echo: false
+    warning: false
+    message: false
+    fig-align: center
+    fig-width: 8
+    fig-height: 4.5
+    smooth-scroll: true
+    embed-resources: true
+    css: styles.css
+    grid:
+      sidebar-width: 220px
+      body-width: 860px
+      margin-width: 160px
+execute:
+  echo: false
+  warning: false
+  message: false
+bibliography: references.bib
+---
+
+```{python}
+#| label: setup
+#| include: false
+
+import matplotlib
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import numpy as np
+from scipy.stats import ttest_ind
+
+# ── Palette ────────────────────────────────────────────────────────────────
+CHARCOAL  = "#2b2b2b"
+SAND      = "#c9b99a"
+MIST      = "#d6d0c8"
+BONE      = "#f5f2ee"
+ACCENT    = "#8c7b68"
+
+plt.rcParams.update({
+    "figure.facecolor":  "none",
+    "axes.facecolor":    "none",
+    "axes.edgecolor":    MIST,
+    "axes.labelcolor":   CHARCOAL,
+    "axes.spines.top":   False,
+    "axes.spines.right": False,
+    "axes.spines.left":  False,
+    "axes.spines.bottom":True,
+    "xtick.color":       CHARCOAL,
+    "ytick.color":       CHARCOAL,
+    "xtick.labelsize":   9,
+    "ytick.labelsize":   9,
+    "axes.labelsize":    10,
+    "axes.titlesize":    12,
+    "axes.titleweight":  "bold",
+    "axes.titlecolor":   CHARCOAL,
+    "grid.color":        MIST,
+    "grid.linewidth":    0.6,
+    "font.family":       "serif",
+    "text.color":        CHARCOAL,
+    "legend.frameon":    False,
+    "legend.fontsize":   9,
+})
+
+# ── Load data ───────────────────────────────────────────────────────────────
+metrics_df = pd.read_csv(
+    "/Users/mariaworkman/fashion/fashion-neutrality/data/results/metrics_full_run.csv"
+)
+metrics_df = metrics_df[metrics_df["ok"] == True]
+
+yearly = (
+    metrics_df
+    .groupby("year")
+    .agg(
+        mean_chroma=("mean_chroma", "mean"),
+        neutral_share=("neutral_share", "mean"),
+        count=("mean_chroma", "size"),
+    )
+    .reset_index()
+    .sort_values("year")
+)
+```
+
+---
+
+## Executive Summary
+
+Fashion consumer data has long served as a barometer of economic sentiment.
+The so-called *lipstick effect*—consumers trading down to small, affordable
+luxuries in downturns—is well documented in industry and financial circles
+[@chase_lipstick].
+Yet a subtler pattern has gone largely unmeasured: the apparent drift of
+runway aesthetics toward muted, neutral palettes during periods of economic
+uncertainty [@fashiontimes_color].
+
+This project takes a systematic approach. Using computer vision and
+unsupervised machine learning, I analyze **2,400 runway images** from the
+*Vogue Runway* archive (2000–2023) to quantify shifts in color saturation
+over time and test whether those shifts correlate with macroeconomic
+conditions.
+
+**Central question:** when the economic outlook becomes less bright, does
+fashion follow suit?
+
+---
+
+## Introduction
+
+### Research Question
+
+> *Does fashion become more visually neutral when economic conditions worsen?*
+
+### Hypothesis
+
+Worsening economic conditions are associated with **lower average chroma** in
+runway fashion imagery. In practical terms, periods of higher unemployment or
+recession correspond with more muted, desaturated color palettes—think greys,
+blacks, and earth tones—while economic expansions correspond with more vivid,
+saturated looks.
+
+### Data & Measures
+
+The analysis combines two data sources:
+
+| | Description |
+|---|---|
+| **Fashion imagery** | *Vogue Runway* dataset via the Internet Archive; 100 runway looks sampled per year, 2000–2023 |
+| **Macroeconomic data** | Annual U.S. unemployment rates and NBER recession indicators |
+
+The **dependent variable** is *mean chroma*: a measure of how vivid or
+saturated the average fashion palette is in a given year, extracted via
+unsupervised machine learning on runway images.
+
+Independent variables include:
+
+- Annual unemployment rate
+- Recession indicator (binary)
+- Lagged economic indicators (prior-year conditions)
+- Year (as a control for long-run trend)
+
+---
+
+## Constructing a Measure of Neutrality
+
+### Image Processing Pipeline
+
+Before extracting color information, I applied **background removal** to
+isolate clothing from distracting runway elements—lighting rigs, backdrops,
+audience. I used Python's `rembg` library, which applies deep
+learning–based segmentation to retain only the foreground subject.
+
+Each image was then processed using **k-means clustering** (*k* = 8) to
+extract its eight dominant palette colors. This unsupervised method groups
+similar pixels by color similarity, giving a compact representation of each
+look's visual palette [@zou2016leads].
+
+### Color Metrics
+
+From those extracted palettes, I construct two complementary metrics:
+
+::: {.callout-note appearance="minimal"}
+**Mean chroma** — the average color intensity across a look's palette.
+Lower values = more muted, desaturated tones. Higher values = more vivid,
+saturated colors.
+
+**Neutral share** — the proportion of palette colors falling below a
+specified chroma threshold. Captures *dominance* of neutral tones, rather
+than simply averaging intensity.
+:::
+
+Results are aggregated by year.
+
+---
+
+## Results
+
+### Color Trends Over Time
+
+```{python}
+#| label: fig-chroma-trend
+#| fig-cap: "Mean chroma of runway fashion imagery, 2000–2023. Shaded bands mark U.S. recession periods (NBER)."
+
+# Recession bands (NBER): 2001, 2007-2009, 2020
+recessions = [(2001, 2001), (2007, 2009), (2020, 2020)]
+
+fig, ax = plt.subplots(figsize=(8, 4))
+
+for (r_start, r_end) in recessions:
+    ax.axvspan(r_start - 0.5, r_end + 0.5, color=MIST, alpha=0.55, label="_nolegend_")
+
+ax.plot(
+    yearly["year"], yearly["mean_chroma"],
+    color=ACCENT, linewidth=2, zorder=3
+)
+ax.fill_between(
+    yearly["year"], yearly["mean_chroma"],
+    alpha=0.12, color=ACCENT, zorder=2
+)
+
+ax.set_xlabel("Year")
+ax.set_ylabel("Mean Chroma")
+ax.set_xlim(yearly["year"].min() - 0.5, yearly["year"].max() + 0.5)
+ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.1f"))
+ax.tick_params(axis="y", left=False)
+ax.yaxis.grid(True)
+
+# Annotate recessions
+ax.text(2001, ax.get_ylim()[0], "↓ Dot-com bust", fontsize=7.5,
+        color=CHARCOAL, alpha=0.6, ha="center", va="bottom")
+ax.text(2008, ax.get_ylim()[0], "↓ GFC", fontsize=7.5,
+        color=CHARCOAL, alpha=0.6, ha="center", va="bottom")
+ax.text(2020, ax.get_ylim()[0], "↓ COVID", fontsize=7.5,
+        color=CHARCOAL, alpha=0.6, ha="center", va="bottom")
+
+fig.tight_layout()
+plt.show()
+```
+
+```{python}
+#| label: fig-neutral-share
+#| fig-cap: "Neutral color share (proportion of palette colors below the chroma threshold), 2000–2023."
+
+fig, ax = plt.subplots(figsize=(8, 4))
+
+for (r_start, r_end) in recessions:
+    ax.axvspan(r_start - 0.5, r_end + 0.5, color=MIST, alpha=0.55)
+
+ax.plot(
+    yearly["year"], yearly["neutral_share"],
+    color=CHARCOAL, linewidth=2, zorder=3
+)
+ax.fill_between(
+    yearly["year"], yearly["neutral_share"],
+    alpha=0.10, color=CHARCOAL, zorder=2
+)
+
+ax.set_xlabel("Year")
+ax.set_ylabel("Neutral Color Share")
+ax.set_xlim(yearly["year"].min() - 0.5, yearly["year"].max() + 0.5)
+ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
+ax.tick_params(axis="y", left=False)
+ax.yaxis.grid(True)
+
+fig.tight_layout()
+plt.show()
+```
+
+As expected, mean chroma and neutral share move in opposite directions over
+time, confirming that the two metrics capture complementary dimensions of the
+same underlying aesthetic signal.
+
+### Distribution of Color Metrics
+
+```{python}
+#| label: fig-distributions
+#| fig-cap: "Image-level distributions of mean chroma (left) and neutral share (right) across all 2,400 runway looks."
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 3.5))
+
+axes[0].hist(metrics_df["mean_chroma"], bins=40, color=ACCENT, alpha=0.80,
+             edgecolor="white", linewidth=0.4)
+axes[0].set_xlabel("Mean Chroma")
+axes[0].set_ylabel("Count")
+axes[0].set_title("Distribution of Mean Chroma")
+axes[0].tick_params(axis="y", left=False)
+axes[0].yaxis.grid(True)
+
+axes[1].hist(metrics_df["neutral_share"], bins=40, color=CHARCOAL, alpha=0.75,
+             edgecolor="white", linewidth=0.4)
+axes[1].set_xlabel("Neutral Share")
+axes[1].set_ylabel("")
+axes[1].set_title("Distribution of Neutral Share")
+axes[1].tick_params(axis="y", left=False)
+axes[1].yaxis.grid(True)
+
+fig.tight_layout()
+plt.show()
+```
+
+### Statistical Test: Are Recession-Era Palettes More Neutral?
+
+To assess whether the visual differences across economic periods are
+statistically meaningful, I compare mean chroma between two windows:
+
+- **Low period** (2006–2009): spanning the lead-up to and peak of the Global
+  Financial Crisis
+- **High period** (2017–2020): a span of sustained economic expansion
+
+A Welch's t-test (unequal variance assumed) tests whether the difference in
+mean chroma across these windows is statistically significant.
+
+```{python}
+#| label: tbl-ttest
+#| tbl-cap: "Welch's t-test comparing mean chroma between recession and expansion periods."
+
+low_period  = metrics_df[metrics_df["year"].between(2006, 2009)]["mean_chroma"]
+high_period = metrics_df[metrics_df["year"].between(2017, 2020)]["mean_chroma"]
+
+t_stat, p_value = ttest_ind(high_period, low_period, equal_var=False)
+
+summary = pd.DataFrame({
+    "Period": ["2006–2009 (GFC / recession)", "2017–2020 (expansion)"],
+    "N": [len(low_period), len(high_period)],
+    "Mean Chroma": [round(low_period.mean(), 3), round(high_period.mean(), 3)],
+})
+
+from IPython.display import display
+display(summary.style
+    .hide(axis="index")
+    .set_properties(**{"text-align": "center"})
+    .format({"Mean Chroma": "{:.3f}"})
+)
+
+print(f"\nT-statistic: {t_stat:.3f}   |   P-value: {p_value:.4f}")
+```
+
+---
+
+## Regression Analysis
+
+### Data & Setup
+
+Economic data is pulled directly from FRED (Federal Reserve Economic Data):
+unemployment rates and a monthly recession indicator (NBER-defined), both
+aggregated to annual averages and merged with the yearly fashion chroma data.
+
+```{python}
+#| label: load-econ
+#| include: false
+
+from sklearn.linear_model import LinearRegression
+
+# Helper to find the date column regardless of what FRED calls it
+def get_date_col(df):
+    for col in df.columns:
+        if "date" in col.lower():
+            return col
+    raise ValueError(f"No date column found. Columns: {df.columns.tolist()}")
+
+# Unemployment from FRED
+unemp_url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=UNRATE"
+unemp = pd.read_csv(unemp_url)
+unemp["year"] = pd.to_datetime(unemp[get_date_col(unemp)]).dt.year
+yearly_unemp = (
+    unemp.groupby("year")
+    .agg(unemployment_rate=("UNRATE", "mean"))
+    .reset_index()
+)
+
+# Recession indicator from FRED
+recession_url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=USREC"
+recession = pd.read_csv(recession_url)
+recession["year"] = pd.to_datetime(recession[get_date_col(recession)]).dt.year
+yearly_recession = (
+    recession.groupby("year")
+    .agg(recession_share=("USREC", "mean"))
+    .reset_index()
+)
+
+# Merge
+merged = (
+    yearly
+    .merge(yearly_unemp, on="year", how="left")
+    .merge(yearly_recession, on="year", how="left")
+    .sort_values("year")
+)
+merged = merged[(merged["year"] >= 2000) & (merged["year"] <= 2023)].copy()
+
+mlr_df = merged.dropna(
+    subset=["mean_chroma", "unemployment_rate", "recession_share", "year"]
+).copy()
+
+# Add change variables
+merged["chroma_change"] = merged["mean_chroma"].diff()
+merged["unemp_change"]  = merged["unemployment_rate"].diff()
+```
+
+### Chroma vs. Economic Indicators
+
+```{python}
+#| label: fig-econ-overlay
+#| fig-cap: "Mean chroma (left axis) plotted against annual unemployment rate and recession share (right axis), 2000–2023."
+
+fig, ax1 = plt.subplots(figsize=(8, 4))
+
+ax1.plot(mlr_df["year"], mlr_df["mean_chroma"],
+         color=ACCENT, linewidth=2, marker="o", markersize=3.5, label="Mean Chroma")
+ax1.set_xlabel("Year")
+ax1.set_ylabel("Mean Chroma", color=ACCENT)
+ax1.tick_params(axis="y", labelcolor=ACCENT, left=False)
+ax1.yaxis.grid(True)
+
+ax2 = ax1.twinx()
+ax2.plot(mlr_df["year"], mlr_df["unemployment_rate"],
+         color=CHARCOAL, linewidth=1.5, linestyle="--", marker="o",
+         markersize=3, alpha=0.7, label="Unemployment Rate")
+ax2.plot(mlr_df["year"], mlr_df["recession_share"],
+         color=SAND, linewidth=1.5, linestyle=":", marker="o",
+         markersize=3, alpha=0.8, label="Recession Share")
+ax2.set_ylabel("Economic Indicators", color=CHARCOAL)
+ax2.tick_params(axis="y", labelcolor=CHARCOAL, right=False)
+ax2.spines["right"].set_visible(False)
+
+lines1, labels1 = ax1.get_legend_handles_labels()
+lines2, labels2 = ax2.get_legend_handles_labels()
+ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper right", fontsize=8)
+
+fig.tight_layout()
+plt.show()
+```
+
+### Model 1: Unemployment + Recession
+
+```{python}
+#| label: reg-model1
+#| include: false
+
+X1 = mlr_df[["unemployment_rate", "recession_share"]]
+y1 = mlr_df["mean_chroma"]
+m1 = LinearRegression().fit(X1, y1)
+mlr_df["pred_m1"] = m1.predict(X1)
+r2_m1 = m1.score(X1, y1)
+coef_m1 = dict(zip(X1.columns, m1.coef_))
+```
+
+```{python}
+#| label: tbl-model1
+#| tbl-cap: "Model 1 — Mean Chroma ~ Unemployment Rate + Recession Share"
+
+rows = {
+    "Term": ["Intercept", "Unemployment Rate", "Recession Share"],
+    "Coefficient": [round(m1.intercept_, 3),
+                    round(coef_m1["unemployment_rate"], 3),
+                    round(coef_m1["recession_share"], 3)],
+}
+tbl1 = pd.DataFrame(rows)
+display(
+    tbl1.style
+    .hide(axis="index")
+    .set_properties(**{"text-align": "center"})
+    .format({"Coefficient": "{:.3f}"})
+)
+print(f"R² = {r2_m1:.3f}")
+```
+
+### Model 2: Adding Year as a Trend Control
+
+```{python}
+#| label: reg-model2
+#| include: false
+
+X2 = mlr_df[["unemployment_rate", "recession_share", "year"]]
+y2 = mlr_df["mean_chroma"]
+m2 = LinearRegression().fit(X2, y2)
+mlr_df["pred_m2"] = m2.predict(X2)
+r2_m2 = m2.score(X2, y2)
+coef_m2 = dict(zip(X2.columns, m2.coef_))
+```
+
+```{python}
+#| label: tbl-model2
+#| tbl-cap: "Model 2 — Mean Chroma ~ Unemployment Rate + Recession Share + Year"
+
+rows2 = {
+    "Term": ["Intercept", "Unemployment Rate", "Recession Share", "Year"],
+    "Coefficient": [round(m2.intercept_, 3),
+                    round(coef_m2["unemployment_rate"], 3),
+                    round(coef_m2["recession_share"], 3),
+                    round(coef_m2["year"], 3)],
+}
+tbl2 = pd.DataFrame(rows2)
+display(
+    tbl2.style
+    .hide(axis="index")
+    .set_properties(**{"text-align": "center"})
+    .format({"Coefficient": "{:.3f}"})
+)
+print(f"R² = {r2_m2:.3f}")
+```
+
+```{python}
+#| label: fig-actual-vs-pred
+#| fig-cap: "Actual mean chroma vs. model-predicted values (Model 2, with year trend), 2000–2023."
+
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.plot(mlr_df["year"], mlr_df["mean_chroma"],
+        color=ACCENT, linewidth=2, marker="o", markersize=4, label="Actual")
+ax.plot(mlr_df["year"], mlr_df["pred_m2"],
+        color=CHARCOAL, linewidth=1.8, linestyle="--", marker="o",
+        markersize=3.5, alpha=0.75, label="Predicted (Model 2)")
+ax.set_xlabel("Year")
+ax.set_ylabel("Mean Chroma")
+ax.tick_params(axis="y", left=False)
+ax.yaxis.grid(True)
+ax.legend(fontsize=8)
+fig.tight_layout()
+plt.show()
+```
+
+### Model 3: Lagged Recession
+
+To test whether fashion responds to economic conditions with a delay,
+I construct a lagged model using the *prior year's* recession share alongside
+current unemployment and a year trend.
+
+```{python}
+#| label: reg-model3
+#| include: false
+
+mlr_df["recession_lag1"] = mlr_df["recession_share"].shift(1)
+lag_df = mlr_df.dropna(
+    subset=["recession_lag1", "unemployment_rate", "mean_chroma", "year"]
+).copy()
+
+X3 = lag_df[["unemployment_rate", "recession_lag1", "year"]]
+y3 = lag_df["mean_chroma"]
+m3 = LinearRegression().fit(X3, y3)
+lag_df["pred_m3"] = m3.predict(X3)
+r2_m3 = m3.score(X3, y3)
+coef_m3 = dict(zip(X3.columns, m3.coef_))
+```
+
+```{python}
+#| label: tbl-model3
+#| tbl-cap: "Model 3 — Mean Chroma ~ Unemployment Rate + Lagged Recession Share + Year"
+
+rows3 = {
+    "Term": ["Intercept", "Unemployment Rate", "Recession Share (t−1)", "Year"],
+    "Coefficient": [round(m3.intercept_, 3),
+                    round(coef_m3["unemployment_rate"], 3),
+                    round(coef_m3["recession_lag1"], 3),
+                    round(coef_m3["year"], 3)],
+}
+tbl3 = pd.DataFrame(rows3)
+display(
+    tbl3.style
+    .hide(axis="index")
+    .set_properties(**{"text-align": "center"})
+    .format({"Coefficient": "{:.3f}"})
+)
+print(f"R² = {r2_m3:.3f}")
+```
+
+```{python}
+#| label: fig-lag-pred
+#| fig-cap: "Actual mean chroma vs. predicted values from the lagged recession model (Model 3)."
+
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.plot(lag_df["year"], lag_df["mean_chroma"],
+        color=ACCENT, linewidth=2, marker="o", markersize=4, label="Actual")
+ax.plot(lag_df["year"], lag_df["pred_m3"],
+        color=CHARCOAL, linewidth=1.8, linestyle="--", marker="o",
+        markersize=3.5, alpha=0.75, label="Predicted (lagged recession)")
+ax.set_xlabel("Year")
+ax.set_ylabel("Mean Chroma")
+ax.tick_params(axis="y", left=False)
+ax.yaxis.grid(True)
+ax.legend(fontsize=8)
+fig.tight_layout()
+plt.show()
+```
+
+### Model Summary
+
+```{python}
+#| label: tbl-model-summary
+#| tbl-cap: "Summary of all regression models. Dependent variable: mean chroma."
+
+summary_tbl = pd.DataFrame({
+    "Model": [
+        "1 — Unemployment + Recession",
+        "2 — + Year trend",
+        "3 — + Lagged Recession",
+    ],
+    "R²": [round(r2_m1, 3), round(r2_m2, 3), round(r2_m3, 3)],
+})
+display(
+    summary_tbl.style
+    .hide(axis="index")
+    .set_properties(**{"text-align": "center"})
+    .format({"R²": "{:.3f}"})
+)
+```
+
+
+
+---
+
+## Discussion & Conclusions
+
+::: {.callout-note appearance="simple" icon=false}
+🚧 **Coming soon.** This section will interpret the regression findings,
+address limitations (e.g., selection bias in runway sampling, chroma as a
+proxy for neutrality), and situate the results within broader conversations
+about fashion as economic signal.
+:::
+
+---
+
+## Methodology Notes
+
+### Sampling
+
+The *Vogue Runway* dataset was filtered to **Collection** section images only,
+excluding backstage and detail shots that do not represent full looks.
+100 images were sampled per year (2000–2023) using a fixed random seed
+(`random_state=0`) for reproducibility. Only images with valid URLs were
+retained.
+
+### Background Removal
+
+Background removal was performed using `rembg` (deep learning–based
+segmentation) to isolate the garment from runway staging. This step
+substantially reduces noise introduced by variable lighting conditions and
+backdrop colors across different shows and venues.
+
+### Color Extraction
+
+Dominant colors were extracted using scikit-learn's `KMeans` implementation
+with *k* = 8 clusters per image, run in CIELab color space. Chroma was
+computed as $C = \sqrt{a^2 + b^2}$, where *a* and *b* are the CIELab
+opponent-color channels. A pixel (or cluster centroid) is classified as
+neutral if its chroma falls below a fixed threshold.
+
+---
+
+*Analysis conducted in Python 3.11. Full code and data pipeline available
+[here](https://github.com/wormaria/fashion-neutrality).*
