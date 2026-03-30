@@ -132,4 +132,4 @@ This project reframes fashion as **quantifiable data**, showing that:
 ## Author
 
 **Maria Workman**  
-UNC Chapel Hill — Statistics & Computer Science  
+UNC Chapel Hill — Statistics & Computer Science
