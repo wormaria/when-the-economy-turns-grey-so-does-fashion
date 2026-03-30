@@ -1,161 +1,142 @@
-# fashion neutrality trends on the runway
+# When the Economy Turns Grey, So Does Fashion  
+### A Machine Learning Analysis of Color Trends and Macroeconomic Conditions
 
-![status](https://img.shields.io/badge/status-in%20progress-blue)
-![python](https://img.shields.io/badge/python-3.10+-blue)
-![focus](https://img.shields.io/badge/focus-computer%20vision%20%7C%20data%20science-lightgrey)
-
----
-
-## tl;dr
-
-- built a computer vision pipeline to **quantify fashion aesthetics** using color (chroma)  
-- validated that the metric captures **real differences in visual style**  
-- found clear time trends in runway color intensity (2013–2023)  
-- extended the analysis to test whether **fashion becomes more neutral during economic downturns**  
-- early results suggest a relationship between **economic stress and muted color palettes**
+<p align="left">
+  <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python" />
+  <img src="https://img.shields.io/badge/Machine%20Learning-KMeans-orange" />
+  <img src="https://img.shields.io/badge/Computer%20Vision-OpenCV-green" />
+  <img src="https://img.shields.io/badge/Data-FRED%20API-lightgrey" />
+  <img src="https://img.shields.io/badge/Status-Completed-success" />
+</p>
 
 ---
 
-## about this project
+## Overview
 
-i started this project in november 2025 after noticing a recurring idea online: that fashion has been “getting more neutral” over time — fewer bold colors, more beige, gray, black, and muted tones.
+Fashion is often described as a reflection of economic sentiment—but most evidence remains anecdotal (e.g., the “lipstick effect”).
 
-people often link this shift to things like minimalism, sustainability, social media aesthetics, or even economic uncertainty.
+This project takes a **data-driven approach**.
 
-i wanted to test whether that idea actually shows up in the data.
+Using **computer vision and unsupervised machine learning**, I analyze **2,400 runway images (2000–2023)** to quantify changes in color intensity and test whether fashion becomes more “neutral” during economic downturns.
 
-but instead of just visually inspecting trends, this project asks a deeper question:
-
-> **can we *quantitatively measure* how “neutral” fashion is — and does that measure change in meaningful ways over time?**
-
-to answer that, i built a computer vision pipeline that extracts color information from runway images and constructs a metric of **fashion neutrality** based on chroma (color intensity).
+> **Key Question:**  
+> When the economy weakens, does fashion become more muted?
 
 ---
 
-## core idea
+## Key Results
 
-this project has two main components:
-
-### 1. measuring fashion aesthetics
-
-i use computer vision and unsupervised learning to extract dominant color palettes from runway looks and compute:
-
-- **mean chroma** → how vivid or saturated colors are  
-- **neutral color share** → how much of an image is near-gray  
-
-together, these serve as a proxy for how visually “loud” or “muted” fashion is in a given year.
-
-### 2. validating the metric
-
-before using these measures in downstream analysis, i test whether they actually capture meaningful aesthetic differences.
-
-i compare periods that are visually distinct (e.g., high-contrast vs low-contrast eras) and show that the chroma-based metric detects statistically significant differences between them.
-
-this step ensures the metric reflects real variation in fashion, not noise.
+- 📉 Higher unemployment → **lower color intensity (chroma)**
+- ⚫ Recession periods → **more neutral color palettes**
+- ⏳ Evidence of **lagged response** in fashion trends
+- 📊 Statistically significant difference between recession vs expansion periods  
+  *(t = 3.91, p < 0.001)*
 
 ---
 
-## data
+## Methodology
 
-- runway images from the **internet archive "vogue runway" dataset**
-- images sampled across years for temporal balance
-- processed into per-image metrics and aggregated yearly
+### 1. Image Processing Pipeline
+- Removed backgrounds using **deep learning segmentation (`rembg`)**
+- Isolated garments from runway noise (lighting, staging, audience)
 
----
+### 2. Color Extraction
+- Applied **K-Means clustering (k=8)** per image
+- Converted to **CIELab color space** for perceptual accuracy
 
-## methodology
+### 3. Feature Engineering
 
-the pipeline:
+**Mean Chroma (Color Intensity):**
 
-1. **image preprocessing**
-   - cropping + background reduction
+C = √(a² + b²)
 
-2. **color extraction**
-   - k-means clustering (dominant colors)
 
-3. **feature construction**
-   - perceptual color space conversion
-   - mean chroma
-   - neutral share
+- Lower → muted / neutral tones  
+- Higher → vivid / saturated tones  
 
-4. **aggregation**
-   - yearly averages
+**Neutral Share:**
+- % of palette below chroma threshold  
+- Captures dominance of neutral colors  
 
----
+### 4. Modeling
 
-## results
+Built regression models linking fashion metrics to:
 
-the time series shows clear structure:
-
-- **2013–2015:** more muted  
-- **2016–2020:** strong shift toward vibrant, high-contrast styles  
-- **2023:** noticeable drop in chroma → possible return to neutrality  
-
-mean chroma and neutral share move in opposite directions, reinforcing that both metrics capture the same underlying aesthetic shift.
+- Unemployment rate (FRED)
+- Recession indicators (NBER)
+- Lagged macroeconomic variables
+- Time trend (year)
 
 ---
 
-## extending the analysis: economics
+## Data
 
-after validating the chroma metric, i test:
-
-> **does fashion become more neutral during economic stress?**
-
-i combine fashion data with:
-
-- unemployment rates  
-- recession indicators  
-
-and run regression + lag models.
-
-this turns the project into an exploration of how **macroeconomic conditions may influence aesthetic trends**.
+| Source | Description |
+|------|--------|
+| Vogue Runway | 100 images/year (2000–2023) |
+| FRED | U.S. unemployment rates |
+| NBER | Recession indicators |
 
 ---
 
-## project structure
+## Model Performance
 
-# ***** TO DO *****
-
-
-
----
-
-## current status
-
-- pipeline built end-to-end  
-- chroma metric constructed + validated  
-- time series trends established  
-- economic data integrated  
-- regression + lag models implemented  
-
-still exploratory, but structurally complete.
+| Model | Variables | R² |
+|------|----------|----|
+| Model 1 | Unemployment + Recession | 0.087 |
+| Model 2 | + Year Trend | 0.104 |
+| Model 3 | + Lagged Recession | 0.062 |
 
 ---
 
-## next steps
+## Tech Stack
 
-- extend dataset to **2024–2025**  
-- improve garment segmentation  
-- refine chroma metric  
-- strengthen statistical validation  
-- explore additional economic/cultural variables  
-- build interactive visualizations  
-
----
-
-## why this matters
-
-fashion is usually analyzed qualitatively.
-
-this project shows that it’s possible to:
-
-> **quantify aesthetic change and study it like a time series**
-
-it reframes fashion as not just style — but as a measurable reflection of broader social and economic conditions.
+- **Python 3.11**
+- `scikit-learn` – KMeans clustering  
+- `OpenCV`, `rembg` – image processing  
+- `pandas`, `NumPy` – data manipulation  
+- `Matplotlib` – visualization  
+- FRED API – macroeconomic data  
 
 ---
 
-## setup
+## Why This Project Matters
 
-```bash
-pip install -r requirements.txt
+This project reframes fashion as **quantifiable data**, showing that:
+
+- Aesthetic trends can be measured systematically  
+- Machine learning can uncover patterns in **non-traditional datasets**  
+- Cultural signals (like fashion) may track macroeconomic conditions  
+
+> This bridges **computer vision, economics, and cultural analytics**.
+
+---
+
+## Limitations
+
+- Runway ≠ consumer purchasing behavior  
+- Fashion influenced by design cycles, culture, and seasonality  
+- Chroma simplifies complex visual aesthetics  
+
+---
+
+## Future Work
+
+- Incorporate **texture, silhouette, and fabric features**
+- Expand to **consumer / retail datasets**
+- Validate metrics with **human perception studies**
+- Build **brand-level “style fingerprints”**
+
+---
+
+## Author
+
+**Maria Workman**  
+UNC Chapel Hill — Statistics & Computer Science  
+
+---
+
+## TL;DR
+
+> Fashion doesn’t just reflect the economy —  
+> it can be **measured as part of it**.
